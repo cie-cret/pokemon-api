@@ -15,7 +15,8 @@
   font-family: 'Sukhumvit';
   font-weight: 400;
   overflow-x: hidden;
-  overflow-y: hidden;
+  /* overflow-y: hidden; */
+  /* line-height: 24px; */
 }
 
 /* Hide X Mark when typing */

@@ -1,24 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { usePokemonStore } from '@/stores/PokemonStore'
+import axios from 'axios'
 
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 import XIcon from '@/components/icons/XIcon.vue'
+// import FavIcon from '@/components/icons/FavIcon.vue'
 
 const searchItem = ref<string>('')
-// const windowWidth = window.innerWidth
+const isFavorite = ref<boolean>(false)
+const isLoading = ref<boolean>(false)
+const pokemonStore = usePokemonStore()
+const filteredVersions = computed(() => {
+  return pokemonStore.pokemonRawData.pkmVersion.slice(0, 3)
+})
 
-const handleSearch = () => {
-  if (searchItem.value !== '') {
-    console.log('Yeah!')
-    // Send Request
+const capitalizeFirstLetter = (letter: string): string => {
+  return letter.charAt(0).toUpperCase() + letter.slice(1)
+}
+
+const handleSearch = async () => {
+  try {
+    isLoading.value = true
+    const pokemonName = searchItem.value.toLowerCase()
+    await pokemonStore.loadData(pokemonName)
+    setTimeout(() => (isLoading.value = false), 1000)
+    // isLoading.value = false
+  } catch (error) {
+    console.log('Error Home:', error)
   }
 }
 
 const handleEnter = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     handleSearch()
-    // Send Request
   }
+}
+
+const toggleFav = () => {
+  isFavorite.value = !isFavorite.value
 }
 </script>
 
@@ -28,7 +48,7 @@ const handleEnter = (event: KeyboardEvent) => {
     <section class="t-container">
       <!-- Logo -->
       <img src="/pokemon_logo.png" alt="pokemon_logo" id="pokemon-logo" />
-      <!-- White box -->
+      <!-- Hero -->
       <div class="search-box">
         <div class="search-container">
           <!-- Search -->
@@ -52,7 +72,118 @@ const handleEnter = (event: KeyboardEvent) => {
 
           <!-- Display -->
           <div class="search-info">
-            <p>Try search for Pokémon by their name</p>
+            <div v-if="!pokemonStore.pokemonRawData.pkmName">
+              <p v-if="!isLoading">Try search for Pokémon by their name</p>
+            </div>
+            <!-- Loading Screen -->
+            <div v-else-if="isLoading" class="loading-wrapper">
+              <div class="loading-spinner-wrapper">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 40 40"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M4.41598 26.9833C4.74727 27.7205 4.4182 28.5867 3.681 28.918C2.94379 29.2493 2.07761 28.9202 1.74632 28.183C0.600507 25.6332 0 22.857 0 20C0 8.95453 8.95453 0 20 0C31.0455 0 40 8.95453 40 20C40 31.0455 31.0455 40 20 40C15.3068 40 10.8594 38.3761 7.30534 35.4561C6.68085 34.9431 6.59052 34.0209 7.10359 33.3964C7.61665 32.7719 8.53882 32.6816 9.16331 33.1947C12.1987 35.6885 15.991 37.0732 20 37.0732C29.429 37.0732 37.0732 29.429 37.0732 20C37.0732 10.571 29.429 2.92683 20 2.92683C10.571 2.92683 2.92683 10.571 2.92683 20C2.92683 22.4415 3.43894 24.8091 4.41598 26.9833Z"
+                    fill="#30A7D7"
+                  />
+                </svg>
+              </div>
+              <div class="loading-text-wrapper">
+                <h3>Sending Request</h3>
+                <p>
+                  Please wait<span class="dot1">.</span
+                  ><span class="dot2">.</span><span class="dot3">.</span>
+                </p>
+              </div>
+            </div>
+            <!-- <div v-else-if="searchItem.value && Error">
+              <p>Not Found</p>
+            </div> -->
+            <div v-else class="grid-control result">
+              <!-- Left -->
+              <div class="artwork-wrapper">
+                <img
+                  :src="pokemonStore.pokemonRawData.pkmArtwork"
+                  :alt="`${pokemonStore.pokemonRawData.pkmName} artwork`"
+                />
+              </div>
+              <div class="flex-control">
+                <div class="info-wrapper">
+                  <!-- Right -->
+                  <!-- Top -->
+                  <div class="t-info">
+                    <div class="heading-name-wrapper">
+                      <h3>
+                        {{
+                          capitalizeFirstLetter(
+                            pokemonStore.pokemonRawData.pkmName,
+                          )
+                        }}
+                      </h3>
+                    </div>
+
+                    <!-- Favorite Button -->
+                    <button @click="toggleFav">
+                      <svg
+                        width="32"
+                        height="32"
+                        viewBox="0 0 32 32"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          width="32"
+                          height="32"
+                          rx="16"
+                          :fill="isFavorite ? '#FFF8DD' : '#F5F7FB'"
+                        />
+                        <path
+                          d="M14.7805 7.82918C15.1397 6.72361 16.7038 6.72361 17.063 7.82918L18.3465 11.7793C18.5072 12.2738 18.9679 12.6085 19.4878 12.6085H23.6412C24.8037 12.6085 25.287 14.0961 24.3466 14.7793L20.9864 17.2207C20.5658 17.5262 20.3898 18.0679 20.5504 18.5623L21.8339 22.5125C22.1931 23.618 20.9278 24.5374 19.9873 23.8541L16.6271 21.4128C16.2065 21.1072 15.637 21.1072 15.2164 21.4128L11.8562 23.8541C10.9158 24.5374 9.65038 23.618 10.0096 22.5125L11.2931 18.5623C11.4537 18.0679 11.2777 17.5262 10.8572 17.2207L7.49696 14.7793C6.5565 14.0961 7.03983 12.6085 8.2023 12.6085H12.3557C12.8756 12.6085 13.3364 12.2738 13.497 11.7793L14.7805 7.82918Z"
+                          :fill="isFavorite ? '#FFCB05' : '#D7D9E1'"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <!-- Mid -->
+                  <div class="m-info">
+                    <div class="mid-info-wrapper">
+                      <div class="weight-wrapper">
+                        <h4>Weight</h4>
+                        <p>
+                          {{ pokemonStore.pokemonRawData.pkmWeight / 10 }} kg
+                        </p>
+                      </div>
+                      <div class="height-wrapper">
+                        <h4>Height</h4>
+                        <p>
+                          {{ pokemonStore.pokemonRawData.pkmHeight * 10 }} cm
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Bottom -->
+                  <div class="b-info">
+                    <div class="version-wrapper"><h4>Versions</h4></div>
+                    <!-- Tags -->
+                    <div class="tag-wrapper">
+                      <ul
+                        v-for="item in filteredVersions"
+                        :key="item.game_index"
+                      >
+                        <li class="version-tag">
+                          {{ capitalizeFirstLetter(item.version.name) }}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -65,14 +196,14 @@ const handleEnter = (event: KeyboardEvent) => {
         <div class="heading-wrapper"><h2>Favorite</h2></div>
         <div class="fav-tag">
           <!-- Window -->
-          <ul class="grid-control grid">
+          <ul class="grid-control">
             <!-- Tags -->
             <li
               v-for="item in ['pikachu', 'eevee', 'raichu']"
               :key="item"
               class="relative"
             >
-              {{ item.charAt(0).toUpperCase() + item.slice(1) }}
+              {{ capitalizeFirstLetter(item) }}
               <button class="x-icon absolute"><XIcon></XIcon></button>
             </li>
           </ul>
@@ -91,6 +222,7 @@ $Text: #6f7794;
 $Black: #121419;
 $Tag: #dbf5ff;
 $Border: #b6bac8;
+$ImageBg: #f5f7fb;
 
 @mixin mobile {
   @media (min-width: 375px) {
@@ -114,6 +246,18 @@ $Border: #b6bac8;
     0 0 0 1px #fff,
     0 4px 8px 0 rgba(46, 46, 46, 0.7);
   box-sizing: content-box;
+}
+
+@mixin grid-control {
+  @apply grid
+
+  @include mobile {
+    @apply grid-cols-1;
+  }
+
+  @include laptop {
+    @apply grid-cols-2;
+  }
 }
 
 // SCSS Start Here
@@ -187,10 +331,15 @@ $Border: #b6bac8;
         width: 100%;
         border: 1px solid $Border;
         border-radius: calc(8px - 2px);
-        padding: 8px 16px;
+        padding: 7px 16px;
         padding-left: 40px;
         padding-right: 55px;
         font-size: 14px;
+        line-height: 24px;
+
+        &:focus {
+          outline: 2px solid $Yellow;
+        }
       }
 
       // Search Icon
@@ -219,16 +368,17 @@ $Border: #b6bac8;
       @apply flex justify-center items-center;
 
       @include mobile {
-        height: 41.222vh;
-        // background: #ffcb05;
+        height: 378px;
       }
 
       @include laptop {
         height: 202px;
       }
+
       p {
         color: $Text;
         font-weight: 600;
+        overflow-y: hidden;
 
         @include mobile {
           font-size: 16px;
@@ -236,6 +386,150 @@ $Border: #b6bac8;
 
         @include laptop {
           font-size: 18px;
+        }
+      }
+
+      // Loading Screen
+
+      // Loading Spinner
+
+      .loading-spinner-wrapper {
+        margin: 4px;
+        justify-self: center;
+        margin-bottom: 28px;
+        animation: spin 1s linear infinite;
+      }
+
+      .loading-text-wrapper {
+        line-height: 24px;
+        h3 {
+          font-weight: 600;
+          font-size: 18px;
+          color: $Black;
+          overflow-y: hidden;
+        }
+
+        p {
+          font-weight: 400;
+          font-size: 14px;
+          color: $Text;
+          justify-self: center;
+          margin-top: 4px;
+
+          span {
+            animation: appear 2s linear infinite;
+            &.dot1 {
+              opacity: 0;
+              animation-delay: 0s;
+            }
+            &.dot2 {
+              opacity: 0;
+              animation-delay: 0.3s;
+            }
+            &.dot3 {
+              opacity: 0;
+              animation-delay: 0.6s;
+            }
+          }
+        }
+      }
+
+      // Showing info
+
+      .grid-control {
+        animation: showing 0.5s ease-in-out;
+        @include mobile {
+          gap: 24px;
+        }
+
+        @include laptop {
+          gap: 36px;
+        }
+
+        // Left
+
+        .artwork-wrapper {
+          background-color: $ImageBg;
+          border-radius: 4px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          @include mobile {
+            min-height: 200px;
+            min-width: 279px;
+          }
+
+          @include laptop {
+            min-height: 202px;
+            min-width: 281px;
+          }
+
+          img {
+            max-width: 160px;
+            max-height: 160px;
+            object-fit: scale-down;
+          }
+        }
+      }
+
+      // Right
+
+      .flex-control {
+        display: flex;
+      }
+
+      .info-wrapper {
+        // Top Right
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 100%;
+        overflow-y: scroll;
+        .t-info {
+          display: flex;
+          justify-content: space-between;
+
+          h3 {
+            color: $Black;
+            font-size: 24px;
+            font-weight: 600;
+            max-height: 32px;
+            overflow-y: hidden;
+          }
+        }
+      }
+
+      // Mid Right
+      .mid-info-wrapper {
+        @apply grid grid-cols-2;
+
+        p {
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 24px;
+          color: $Black;
+        }
+      }
+
+      // Bottom Right
+
+      .b-info {
+        @apply flex flex-col;
+
+        .tag-wrapper {
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+        }
+
+        .version-tag {
+          background: $Tag;
+          border-radius: 10px;
+          padding: 1px 8px;
+          font-size: 12px;
+          font-weight: 600;
+          // overflow: visible;
         }
       }
     }
@@ -268,6 +562,7 @@ $Border: #b6bac8;
       font-weight: 600;
       color: $Black;
       margin-bottom: 8px;
+      overflow-y: hidden;
     }
 
     // Tags
@@ -275,14 +570,6 @@ $Border: #b6bac8;
     .fav-tag {
       .grid-control {
         gap: 8px 24px;
-
-        @include mobile {
-          @apply grid-cols-1;
-        }
-
-        @include laptop {
-          @apply grid-cols-2;
-        }
 
         .x-icon {
           right: 16px;
@@ -304,12 +591,77 @@ $Border: #b6bac8;
   }
 }
 
+// Multiple uses
+
+.grid-control {
+  display: grid;
+  @include mobile {
+    @apply grid-cols-1;
+  }
+
+  @include laptop {
+    @apply grid-cols-2;
+  }
+}
+
+h4 {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  color: $Text;
+}
+
 @keyframes moving-bg {
   0% {
     background-position: right 0%;
   }
   100% {
     background-position: bottom 100%;
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes showing {
+  0% {
+    scale: 0;
+  }
+
+  25% {
+    scale: 1.1;
+  }
+
+  50% {
+    scale: 0.9;
+  }
+
+  75% {
+    scale: 1.05;
+  }
+
+  90% {
+    scale: 0.99;
+  }
+
+  100% {
+    scale: 1;
   }
 }
 </style>

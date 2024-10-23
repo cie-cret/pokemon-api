@@ -5,6 +5,7 @@ import SearchIcon from '@/components/icons/SearchIcon.vue'
 import XIcon from '@/components/icons/XIcon.vue'
 
 const searchItem = ref<string>('')
+// const windowWidth = window.innerWidth
 
 const handleSearch = () => {
   if (searchItem.value !== '') {
@@ -24,14 +25,14 @@ const handleEnter = (event: KeyboardEvent) => {
 <template>
   <main class="main-container">
     <!-- Top -->
-    <section class="t-container flex flex-col">
+    <section class="t-container">
       <!-- Logo -->
       <img src="/pokemon_logo.png" alt="pokemon_logo" id="pokemon-logo" />
       <!-- White box -->
       <div class="search-box">
         <div class="search-container">
           <!-- Search -->
-          <div class="search-input relative flex justify-center">
+          <div class="search-input relative">
             <button
               type="submit"
               class="search-icon absolute"
@@ -48,8 +49,9 @@ const handleEnter = (event: KeyboardEvent) => {
             />
             <p class="alphabet-count absolute">{{ searchItem.length }}/50</p>
           </div>
+
           <!-- Display -->
-          <div class="search-info flex justify-center items-center">
+          <div class="search-info">
             <p>Try search for Pokémon by their name</p>
           </div>
         </div>
@@ -62,7 +64,8 @@ const handleEnter = (event: KeyboardEvent) => {
         <!-- Heading -->
         <div class="heading-wrapper"><h2>Favorite</h2></div>
         <div class="fav-tag">
-          <ul class="grid-control grid grid-cols-2">
+          <!-- Window -->
+          <ul class="grid-control grid">
             <!-- Tags -->
             <li
               v-for="item in ['pikachu', 'eevee', 'raichu']"
@@ -80,12 +83,26 @@ const handleEnter = (event: KeyboardEvent) => {
 </template>
 
 <style scoped lang="scss">
+// Root
+
 $Yellow: #ffcb05;
 $Blue: #00729f;
 $Text: #6f7794;
 $Black: #121419;
 $Tag: #dbf5ff;
 $Border: #b6bac8;
+
+@mixin mobile {
+  @media (min-width: 375px) {
+    @content;
+  }
+}
+
+@mixin laptop {
+  @media (min-width: 1280px) {
+    @content;
+  }
+}
 
 @mixin modern-border($pColor, $sColor) {
   background: #fff;
@@ -96,16 +113,31 @@ $Border: #b6bac8;
   box-shadow:
     0 0 0 1px #fff,
     0 4px 8px 0 rgba(46, 46, 46, 0.7);
+  box-sizing: content-box;
 }
+
+// SCSS Start Here
 
 // Top
 
 .t-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 73.265vh;
+  // height: 73.265vh;
+
   background: linear-gradient(281.22deg, #0e749d 0%, #30a7d7 100%);
+
+  @include mobile {
+    height: 662px;
+    padding: 32px 16px;
+  }
+
+  @include laptop {
+    height: 570px;
+    padding: 60px;
+  }
 
   // Moving Animation
   // background-size: 140%;
@@ -114,34 +146,51 @@ $Border: #b6bac8;
   #pokemon-logo {
     height: 60px;
     object-fit: contain;
-    margin: 24px; // 1.5rem?
+
+    @include mobile {
+      margin-bottom: 32px;
+    }
+
+    @include laptop {
+      margin-bottom: 48px;
+    }
   }
 
   // White Box Wrapper
 
   .search-box {
     @include modern-border($Yellow, $Blue);
-    height: 332px;
-    width: 664px;
-    margin: 24px;
+
+    @include mobile {
+      height: 502px;
+      width: 339px;
+    }
+
+    @include laptop {
+      height: 328px;
+      width: 658px;
+      margin-bottom: 12px;
+    }
 
     // Search Input Wrapper
 
     .search-container {
-      margin: 32px;
-      height: 100%;
+      margin: 30px;
     }
 
     // Input
 
     .search-input {
       margin-bottom: 24px;
+
       input {
         width: 100%;
         border: 1px solid $Border;
         border-radius: calc(8px - 2px);
         padding: 8px 16px;
         padding-left: 40px;
+        padding-right: 55px;
+        font-size: 14px;
       }
 
       // Search Icon
@@ -167,9 +216,28 @@ $Border: #b6bac8;
     // Display
 
     .search-info {
-      color: $Text;
-      font-weight: 600;
-      height: 202px;
+      @apply flex justify-center items-center;
+
+      @include mobile {
+        height: 41.222vh;
+        // background: #ffcb05;
+      }
+
+      @include laptop {
+        height: 202px;
+      }
+      p {
+        color: $Text;
+        font-weight: 600;
+
+        @include mobile {
+          font-size: 16px;
+        }
+
+        @include laptop {
+          font-size: 18px;
+        }
+      }
     }
   }
 }
@@ -179,25 +247,42 @@ $Border: #b6bac8;
 .b-container {
   background: #fff;
   height: 100%;
+  margin: 32px 16px;
+
+  @include laptop {
+    margin-top: 48px;
+    margin-bottom: 35px;
+  }
 
   // White Box Wrapper
 
   .fav-box {
-    margin-top: 48px;
-    width: 800px;
+    width: 100%;
     justify-self: center;
+
+    @include laptop {
+      width: 800px;
+    }
 
     h2 {
       font-weight: 600;
       color: $Black;
+      margin-bottom: 8px;
     }
 
     // Tags
 
     .fav-tag {
       .grid-control {
-        margin: 8px 0;
         gap: 8px 24px;
+
+        @include mobile {
+          @apply grid-cols-1;
+        }
+
+        @include laptop {
+          @apply grid-cols-2;
+        }
 
         .x-icon {
           right: 16px;
@@ -212,6 +297,8 @@ $Border: #b6bac8;
         border-radius: 4px;
         color: $Black;
         padding: 8px 16px;
+        font-size: 14px;
+        line-height: 24px;
       }
     }
   }

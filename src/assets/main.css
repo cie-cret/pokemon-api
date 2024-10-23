@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'Sukhumvit';
-  src: url(/public/font/SukhumvitSet-Medium.ttf);
+  src: url(/font/SukhumvitSet-Text.ttf);
 }
 
 * {
@@ -13,6 +13,9 @@
   box-sizing: border-box;
   font-size: 18px;
   font-family: 'Sukhumvit';
+  font-weight: 400;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 /* Hide X Mark when typing */

@@ -4,14 +4,29 @@ import axios from 'axios'
 
 const BASE_URL = 'https://pokeapi.co/api/v2/pokemon/'
 
+export interface Version {
+  version: {
+    name: string
+  }
+}
+
+export interface PokemonData {
+  pkmName: string
+  pkmWeight: number
+  pkmHeight: number
+  pkmArtwork: string
+  pkmVersion: Version[] // Adjust the type if needed
+}
+
 export const usePokemonStore = defineStore('pokemon', {
   state: () => ({
     isLoading: false,
     hasError: false,
     isFavorite: false,
     reachLimit: false,
-    pokemonData: {},
-    favPokemonList: JSON.parse(localStorage.getItem('favorite-save')) || [],
+    pokemonData: {} as PokemonData,
+    favPokemonList:
+      JSON.parse(localStorage.getItem('favorite-save') as string) || [],
   }),
   actions: {
     async loadData(pokemonName: string) {
@@ -39,18 +54,20 @@ export const usePokemonStore = defineStore('pokemon', {
           this.isFavorite = true
         }
 
-        // console.log(this.pokemonData)
         return this.pokemonData
       } catch (error) {
         this.hasError = true
         setTimeout(() => (this.hasError = false), 5000)
-        console.log('Store Error:', error.status)
+        console.log('Store Error:', error)
       } finally {
         // this.isLoading = false
         setTimeout(() => (this.isLoading = false), 1000)
       }
     },
     saveFavorite() {
+      const favoriteSave = localStorage.getItem('favorite-save')
+      this.favPokemonList = favoriteSave ? JSON.parse(favoriteSave) : []
+
       const existingIndex = this.getFavoriteIndex(this.pokemonData.pkmName)
       const numberOfFavs = Object.keys(this.favPokemonList).length // REVISE HERE
 
@@ -72,7 +89,7 @@ export const usePokemonStore = defineStore('pokemon', {
     },
     getFavoriteIndex(pokemonName: string) {
       return this.favPokemonList.findIndex(
-        pokemon => pokemon.pkmName === pokemonName,
+        (pokemon: PokemonData) => pokemon.pkmName === pokemonName,
       )
     },
     deleteFavoriteItem(index: number) {

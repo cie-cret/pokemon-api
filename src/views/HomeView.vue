@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { usePokemonStore } from '@/stores/PokemonStore'
-import axios from 'axios'
 
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 import XIcon from '@/components/icons/XIcon.vue'
 // import FavIcon from '@/components/icons/FavIcon.vue'
 
 const searchItem = ref<string>('')
-const isFavorite = ref<boolean>(false)
 const pokemonStore = usePokemonStore()
 const filteredVersions = computed(() => {
   return pokemonStore.pokemonData.pkmVersion.slice(0, 3)
@@ -37,7 +35,7 @@ const handleEnter = (event: KeyboardEvent) => {
 }
 
 const toggleFav = () => {
-  const favButton = document.querySelector('#fav-button')
+  const favButton = document.querySelector('#fav-button') as HTMLButtonElement
   pokemonStore.saveFavorite()
 
   if (!pokemonStore.reachLimit) {
@@ -49,7 +47,7 @@ const deleteFav = (index: number, pokemonName: string) => {
   pokemonStore.deleteFavoriteItem(index)
 
   if (pokemonStore.pokemonData.pkmName === pokemonName) {
-    const favButton = document.querySelector('#fav-button')
+    const favButton = document.querySelector('#fav-button') as HTMLButtonElement
     favButton.classList.toggle('flip-animation')
   }
 }
@@ -197,11 +195,12 @@ const deleteFav = (index: number, pokemonName: string) => {
                     <div class="version-wrapper"><h4>Versions</h4></div>
                     <!-- Tags -->
                     <div class="tag-wrapper">
-                      <ul
-                        v-for="item in filteredVersions"
-                        :key="item.game_index"
-                      >
-                        <li class="version-tag">
+                      <ul>
+                        <li
+                          v-for="(item, index) in filteredVersions"
+                          :key="index"
+                          class="version-tag"
+                        >
                           {{ capitalizeFirstLetter(item.version.name) }}
                         </li>
                       </ul>
@@ -226,7 +225,7 @@ const deleteFav = (index: number, pokemonName: string) => {
             <!-- Tags -->
             <li
               v-for="(pokemon, index) in pokemonStore.favPokemonList"
-              :key="pokemon.index"
+              :key="index"
               class="relative"
             >
               <div class="fav-item">
@@ -384,10 +383,11 @@ $ImageBg: #f5f7fb;
       // Search Icon
 
       .search-icon {
-        left: 16px;
+        left: 6px;
         top: 0;
         bottom: 0;
         margin: auto;
+        padding: 10px;
       }
 
       // Alphabet Count
@@ -437,12 +437,20 @@ $ImageBg: #f5f7fb;
 
       // Loading Screen
 
+      .loading-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
       // Loading Spinner
 
       .loading-spinner-wrapper {
         margin: 4px;
-        justify-self: center;
         margin-bottom: 28px;
+        width: 40px;
+        height: 40px;
         animation: spin 1s linear infinite;
       }
 
@@ -459,7 +467,6 @@ $ImageBg: #f5f7fb;
           font-weight: 400;
           font-size: 14px;
           color: $Text;
-          justify-self: center;
           margin-top: 4px;
 
           span {
@@ -578,9 +585,11 @@ $ImageBg: #f5f7fb;
         @apply flex flex-col;
 
         .tag-wrapper {
-          display: flex;
-          flex-direction: row;
-          gap: 4px;
+          ul {
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+          }
         }
 
         .version-tag {
@@ -598,6 +607,8 @@ $ImageBg: #f5f7fb;
 // Bottom
 
 .b-container {
+  @apply flex justify-center;
+
   background: #fff;
   height: 100%;
   margin: 32px 16px;
@@ -611,7 +622,6 @@ $ImageBg: #f5f7fb;
 
   .fav-box {
     width: 100%;
-    justify-self: center;
 
     @include laptop {
       width: 800px;
@@ -653,10 +663,11 @@ $ImageBg: #f5f7fb;
             }
 
             .x-icon {
-              right: 16px;
+              right: 6px;
               top: 0;
               bottom: 0;
               margin: auto 0;
+              padding: 10px;
 
               &:hover {
                 scale: 1.2;

@@ -12,7 +12,7 @@
   margin: 0;
   box-sizing: border-box;
   font-size: 18px;
-  font-family: 'Sukhumvit';
+  font-family: 'Sukhumvit', sans-serif;
   font-weight: 400;
   overflow-x: hidden;
   /* overflow-y: hidden; */

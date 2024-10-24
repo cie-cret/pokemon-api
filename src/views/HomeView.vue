@@ -9,23 +9,22 @@ import XIcon from '@/components/icons/XIcon.vue'
 
 const searchItem = ref<string>('')
 const isFavorite = ref<boolean>(false)
-const isLoading = ref<boolean>(false)
 const pokemonStore = usePokemonStore()
 const filteredVersions = computed(() => {
-  return pokemonStore.pokemonRawData.pkmVersion.slice(0, 3)
+  return pokemonStore.pokemonData.pkmVersion.slice(0, 3)
 })
 
 const capitalizeFirstLetter = (letter: string): string => {
   return letter.charAt(0).toUpperCase() + letter.slice(1)
 }
 
-const handleSearch = async () => {
+const handleSearch = async (favName?: string) => {
   try {
-    isLoading.value = true
+    if (favName) {
+      searchItem.value = capitalizeFirstLetter(favName)
+    }
     const pokemonName = searchItem.value.toLowerCase()
     await pokemonStore.loadData(pokemonName)
-    setTimeout(() => (isLoading.value = false), 1000)
-    // isLoading.value = false
   } catch (error) {
     console.log('Error Home:', error)
   }
@@ -38,7 +37,21 @@ const handleEnter = (event: KeyboardEvent) => {
 }
 
 const toggleFav = () => {
-  isFavorite.value = !isFavorite.value
+  const favButton = document.querySelector('#fav-button')
+  pokemonStore.saveFavorite()
+
+  if (!pokemonStore.reachLimit) {
+    favButton.classList.toggle('flip-animation')
+  }
+}
+
+const deleteFav = (index: number, pokemonName: string) => {
+  pokemonStore.deleteFavoriteItem(index)
+
+  if (pokemonStore.pokemonData.pkmName === pokemonName) {
+    const favButton = document.querySelector('#fav-button')
+    favButton.classList.toggle('flip-animation')
+  }
 }
 </script>
 
@@ -57,6 +70,7 @@ const toggleFav = () => {
               type="submit"
               class="search-icon absolute"
               @click="handleSearch()"
+              aria-label="search"
             >
               <SearchIcon></SearchIcon>
             </button>
@@ -72,11 +86,20 @@ const toggleFav = () => {
 
           <!-- Display -->
           <div class="search-info">
-            <div v-if="!pokemonStore.pokemonRawData.pkmName">
-              <p v-if="!isLoading">Try search for Pokémon by their name</p>
+            <!-- Main Screen -->
+            <div
+              v-if="
+                !pokemonStore.pokemonData.pkmName && !pokemonStore.isLoading
+              "
+            >
+              <p v-if="!pokemonStore.hasError">
+                Try search for Pokémon by their name
+              </p>
+              <!-- Error -->
+              <p v-else class="error-text">Not Found</p>
             </div>
             <!-- Loading Screen -->
-            <div v-else-if="isLoading" class="loading-wrapper">
+            <div v-else-if="pokemonStore.isLoading" class="loading-wrapper">
               <div class="loading-spinner-wrapper">
                 <svg
                   width="40"
@@ -101,34 +124,37 @@ const toggleFav = () => {
                 </p>
               </div>
             </div>
-            <!-- <div v-else-if="searchItem.value && Error">
-              <p>Not Found</p>
-            </div> -->
+
+            <!-- Success -->
             <div v-else class="grid-control result">
               <!-- Left -->
               <div class="artwork-wrapper">
                 <img
-                  :src="pokemonStore.pokemonRawData.pkmArtwork"
-                  :alt="`${pokemonStore.pokemonRawData.pkmName} artwork`"
+                  :src="pokemonStore.pokemonData.pkmArtwork"
+                  :alt="`${pokemonStore.pokemonData.pkmName} artwork`"
                 />
               </div>
               <div class="flex-control">
                 <div class="info-wrapper">
                   <!-- Right -->
-                  <!-- Top -->
+                  <!-- Top Right -->
                   <div class="t-info">
                     <div class="heading-name-wrapper">
                       <h3>
                         {{
                           capitalizeFirstLetter(
-                            pokemonStore.pokemonRawData.pkmName,
+                            pokemonStore.pokemonData.pkmName,
                           )
                         }}
                       </h3>
                     </div>
 
                     <!-- Favorite Button -->
-                    <button @click="toggleFav">
+                    <button
+                      @click="toggleFav"
+                      id="fav-button"
+                      aria-label="save to favorite"
+                    >
                       <svg
                         width="32"
                         height="32"
@@ -140,33 +166,33 @@ const toggleFav = () => {
                           width="32"
                           height="32"
                           rx="16"
-                          :fill="isFavorite ? '#FFF8DD' : '#F5F7FB'"
+                          :fill="
+                            pokemonStore.isFavorite ? '#FFF8DD' : '#F5F7FB'
+                          "
                         />
                         <path
                           d="M14.7805 7.82918C15.1397 6.72361 16.7038 6.72361 17.063 7.82918L18.3465 11.7793C18.5072 12.2738 18.9679 12.6085 19.4878 12.6085H23.6412C24.8037 12.6085 25.287 14.0961 24.3466 14.7793L20.9864 17.2207C20.5658 17.5262 20.3898 18.0679 20.5504 18.5623L21.8339 22.5125C22.1931 23.618 20.9278 24.5374 19.9873 23.8541L16.6271 21.4128C16.2065 21.1072 15.637 21.1072 15.2164 21.4128L11.8562 23.8541C10.9158 24.5374 9.65038 23.618 10.0096 22.5125L11.2931 18.5623C11.4537 18.0679 11.2777 17.5262 10.8572 17.2207L7.49696 14.7793C6.5565 14.0961 7.03983 12.6085 8.2023 12.6085H12.3557C12.8756 12.6085 13.3364 12.2738 13.497 11.7793L14.7805 7.82918Z"
-                          :fill="isFavorite ? '#FFCB05' : '#D7D9E1'"
+                          :fill="
+                            pokemonStore.isFavorite ? '#FFCB05' : '#D7D9E1'
+                          "
                         />
                       </svg>
                     </button>
                   </div>
-                  <!-- Mid -->
+                  <!-- Mid Right -->
                   <div class="m-info">
                     <div class="mid-info-wrapper">
                       <div class="weight-wrapper">
                         <h4>Weight</h4>
-                        <p>
-                          {{ pokemonStore.pokemonRawData.pkmWeight / 10 }} kg
-                        </p>
+                        <p>{{ pokemonStore.pokemonData.pkmWeight }} kg</p>
                       </div>
                       <div class="height-wrapper">
                         <h4>Height</h4>
-                        <p>
-                          {{ pokemonStore.pokemonRawData.pkmHeight * 10 }} cm
-                        </p>
+                        <p>{{ pokemonStore.pokemonData.pkmHeight }} cm</p>
                       </div>
                     </div>
                   </div>
-                  <!-- Bottom -->
+                  <!-- Bottom Right -->
                   <div class="b-info">
                     <div class="version-wrapper"><h4>Versions</h4></div>
                     <!-- Tags -->
@@ -199,12 +225,25 @@ const toggleFav = () => {
           <ul class="grid-control">
             <!-- Tags -->
             <li
-              v-for="item in ['pikachu', 'eevee', 'raichu']"
-              :key="item"
+              v-for="(pokemon, index) in pokemonStore.favPokemonList"
+              :key="pokemon.index"
               class="relative"
             >
-              {{ capitalizeFirstLetter(item) }}
-              <button class="x-icon absolute"><XIcon></XIcon></button>
+              <div class="fav-item">
+                <div
+                  class="name-wrapper"
+                  @click="handleSearch(pokemon.pkmName)"
+                >
+                  {{ capitalizeFirstLetter(pokemon.pkmName) }}
+                </div>
+                <button
+                  class="x-icon absolute"
+                  aria-label="delete from favorite"
+                  @click="deleteFav(index, pokemon.pkmName)"
+                >
+                  <XIcon></XIcon>
+                </button>
+              </div>
             </li>
           </ul>
         </div>
@@ -367,6 +406,8 @@ $ImageBg: #f5f7fb;
     .search-info {
       @apply flex justify-center items-center;
 
+      overflow-y: hidden;
+
       @include mobile {
         height: 378px;
       }
@@ -381,11 +422,16 @@ $ImageBg: #f5f7fb;
         overflow-y: hidden;
 
         @include mobile {
-          font-size: 16px;
+          font-size: 14px;
         }
 
         @include laptop {
           font-size: 18px;
+        }
+
+        &.error-text {
+          font-size: 14px;
+          color: $Border;
         }
       }
 
@@ -455,6 +501,11 @@ $ImageBg: #f5f7fb;
           justify-content: center;
           align-items: center;
 
+          :hover {
+            scale: 1.05;
+            transition: scale 0.2s ease-in-out;
+          }
+
           @include mobile {
             min-height: 200px;
             min-width: 279px;
@@ -469,6 +520,7 @@ $ImageBg: #f5f7fb;
             max-width: 160px;
             max-height: 160px;
             object-fit: scale-down;
+            transition: all 0.2s ease-in-out;
           }
         }
       }
@@ -485,10 +537,18 @@ $ImageBg: #f5f7fb;
         flex-direction: column;
         gap: 16px;
         min-width: 100%;
-        overflow-y: scroll;
+
         .t-info {
           display: flex;
           justify-content: space-between;
+
+          #fav-button {
+            transform: rotateY(0);
+            transition: transform 0.3s;
+            &.flip-animation {
+              transform: rotateY(180deg);
+            }
+          }
 
           h3 {
             color: $Black;
@@ -529,7 +589,6 @@ $ImageBg: #f5f7fb;
           padding: 1px 8px;
           font-size: 12px;
           font-weight: 600;
-          // overflow: visible;
         }
       }
     }
@@ -571,21 +630,40 @@ $ImageBg: #f5f7fb;
       .grid-control {
         gap: 8px 24px;
 
-        .x-icon {
-          right: 16px;
-          top: 0;
-          bottom: 0;
-          margin: auto 0;
-        }
-      }
+        li {
+          border-radius: 4px;
+          overflow-y: hidden;
 
-      li {
-        background: $Tag;
-        border-radius: 4px;
-        color: $Black;
-        padding: 8px 16px;
-        font-size: 14px;
-        line-height: 24px;
+          .fav-item {
+            border-radius: 4px;
+            color: $Black;
+            padding: 8px 16px;
+            background: $Tag;
+
+            .name-wrapper {
+              // display: inline;
+              font-size: 14px;
+              line-height: 24px;
+              cursor: pointer;
+              transition: all 0.2s ease-in-out;
+
+              &:hover {
+                font-size: 15px;
+              }
+            }
+
+            .x-icon {
+              right: 16px;
+              top: 0;
+              bottom: 0;
+              margin: auto 0;
+
+              &:hover {
+                scale: 1.2;
+              }
+            }
+          }
+        }
       }
     }
   }

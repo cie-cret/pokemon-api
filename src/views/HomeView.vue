@@ -34,8 +34,8 @@ const handleSearch = async (favName?: string) => {
   }
 }
 
-const updateSearchItem = (SearchItem: string) => {
-  searchItem.value = SearchItem
+const updateSearchItem = (searchItemValue: string) => {
+  searchItem.value = searchItemValue
 }
 </script>
 

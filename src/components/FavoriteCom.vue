@@ -17,19 +17,21 @@ const isDisabled = ref(false)
 const deleteFav = (index: number, pokemonName: string) => {
   const favButton = document.querySelector('#fav-button') as HTMLButtonElement
   const favItem = document.querySelector(`#fav-item-${index}`) as HTMLElement
-  // emit('sendFavItem', { favItem, index })
 
-  favItem.classList.add('fadeout-animation')
+  // Prevent spamming
   isDisabled.value = true
   setTimeout(() => {
     isDisabled.value = false
-  }, 1000)
+  }, 400)
 
+  // For Animation
+  favItem.classList.add('fadeout-animation')
   setTimeout(() => {
     favItem.classList.remove('fadeout-animation')
     pokemonStore.deleteFavoriteItem(index)
   }, 400)
 
+  // If user perform deletion while the pokemon is on display
   if (pokemonStore.pokemonData.pkmName === pokemonName) {
     setTimeout(() => {
       favButton.classList.toggle('flip-animation')

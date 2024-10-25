@@ -8,13 +8,7 @@ import ArtworkCom from '@/components/ArtworkCom.vue'
 import PokemonInfo from '@/components/PokemonInfo.vue'
 import FavoriteCom from '@/components/FavoriteCom.vue'
 
-// import FavIcon from '@/components/icons/FavIcon.vue'
-
 const searchItem = ref<string>('')
-// const favItemData = ref<{ favItem: HTMLElement | null; index: number | null }>({
-//   favItem: null,
-//   index: null,
-// })
 const pokemonStore = usePokemonStore()
 
 const capFirstLetter = (letter?: string): string => {
@@ -41,10 +35,6 @@ const handleSearch = async (favName?: string) => {
 const sendUserInput = (userInput: string) => {
   searchItem.value = userInput
 }
-
-// const sendFavItemData = (favData: { favItem: HTMLElement; index: number }) => {
-//   favItemData.value = favData
-// }
 </script>
 
 <template>

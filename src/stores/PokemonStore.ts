@@ -81,9 +81,6 @@ export const usePokemonStore = defineStore('pokemon', {
           this.reachLimit = true
           alert('Limit up to 4 Pokémons')
         }
-      } else {
-        this.favPokemonList.splice(existingIndex, 1)
-        this.isFavorite = false
       }
 
       localStorage.setItem('favorite-save', JSON.stringify(this.favPokemonList))
@@ -94,6 +91,7 @@ export const usePokemonStore = defineStore('pokemon', {
       )
     },
     deleteFavoriteItem(index: number) {
+      this.isFavorite = false
       this.favPokemonList.splice(index, 1)
       localStorage.setItem('favorite-save', JSON.stringify(this.favPokemonList))
 

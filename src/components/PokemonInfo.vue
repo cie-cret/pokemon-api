@@ -1,13 +1,15 @@
 <script setup lang="ts">
 const props = defineProps<{
   capFirstLetter: (letter?: string) => string
-  // favItemData: { favItem: HTMLElement | null; index: number | null }
+  pokemon?: PokemonData
 }>()
 
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { usePokemonStore } from '@/stores/PokemonStore'
+import type { PokemonData } from '@/stores/PokemonStore'
 
 const pokemonStore = usePokemonStore()
+const isDisabled = ref(false)
 
 const filteredVersions = computed(() => {
   return pokemonStore.pokemonData.pkmVersion.slice(0, 3)
@@ -15,19 +17,45 @@ const filteredVersions = computed(() => {
 
 const toggleFav = () => {
   const favButton = document.querySelector('#fav-button') as HTMLButtonElement
-  // const { favItem } = props.favItemData
 
+  // Prevent spamming
+  isDisabled.value = true
+  setTimeout(() => {
+    isDisabled.value = false
+  }, 400)
+
+  // For Animation
+  const currentPkmName = pokemonStore.pokemonData.pkmName
+  const index = pokemonStore.favPokemonList.findIndex(
+    (pokemon: PokemonData) => pokemon.pkmName === currentPkmName,
+  )
+  const inFavList = pokemonStore.favPokemonList.find(
+    (pokemon: PokemonData) => pokemon.pkmName === currentPkmName,
+  )
+
+  // Delete
+  if (inFavList) {
+    if (index !== -1) {
+      const favItem = document.querySelector(
+        `#fav-item-${index}`,
+      ) as HTMLElement
+      pokemonStore.isFavorite = false
+
+      // For Animation
+      favItem.classList.add('fadeout-animation')
+      favButton.classList.toggle('flip-animation')
+      setTimeout(() => {
+        favItem.classList.remove('fadeout-animation')
+        pokemonStore.deleteFavoriteItem(index)
+      }, 400)
+    }
+  }
+
+  // Save
   pokemonStore.saveFavorite()
   if (!pokemonStore.reachLimit) {
     favButton.classList.toggle('flip-animation')
   }
-
-  // if (favItem) {
-  //   const favPkmName = favItem.dataset.name
-  //   if (pokemonStore.pokemonData.pkmName === favPkmName) {
-  //     favItem.classList.add('fadeout-animation')
-  //   }
-  // }
 }
 </script>
 
@@ -42,7 +70,12 @@ const toggleFav = () => {
       </div>
 
       <!-- Favorite Button -->
-      <button @click="toggleFav" id="fav-button" aria-label="save to favorite">
+      <button
+        @click="toggleFav"
+        id="fav-button"
+        :disabled="isDisabled"
+        aria-label="save to favorite"
+      >
         <svg
           width="32"
           height="32"

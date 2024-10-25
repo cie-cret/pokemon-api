@@ -49,12 +49,12 @@ const toggleFav = () => {
         pokemonStore.deleteFavoriteItem(index)
       }, 400)
     }
-  }
-
-  // Save
-  pokemonStore.saveFavorite()
-  if (!pokemonStore.reachLimit) {
-    favButton.classList.toggle('flip-animation')
+  } else {
+    // Save
+    pokemonStore.saveFavorite()
+    if (!pokemonStore.reachLimit) {
+      favButton.classList.toggle('flip-animation')
+    }
   }
 }
 </script>

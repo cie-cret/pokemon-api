@@ -122,11 +122,13 @@ const deleteFav = (index: number, pokemonName: string) => {
               line-height: 24px;
               overflow-y: hidden;
               cursor: pointer;
-              transition: all 0.2s ease-in-out;
+              transition:
+                font-weight 0.1s ease-in-out,
+                font-size 0.2s ease-in-out;
 
               &:hover {
-                font-size: 16px;
                 font-weight: 600;
+                font-size: 16px;
               }
             }
 

@@ -26,6 +26,7 @@ const handleSearch = async (favName?: string) => {
     if (favName) {
       searchItem.value = capFirstLetter(favName)
     }
+
     const pokemonName = searchItem.value.toLowerCase()
     await pokemonStore.loadData(pokemonName)
   } catch (error) {
@@ -33,8 +34,8 @@ const handleSearch = async (favName?: string) => {
   }
 }
 
-const updateSearchItem = (newSearchItem: string) => {
-  searchItem.value = newSearchItem
+const updateSearchItem = (SearchItem: string) => {
+  searchItem.value = SearchItem
 }
 </script>
 
@@ -49,6 +50,7 @@ const updateSearchItem = (newSearchItem: string) => {
         <div class="search-container">
           <!-- Search Bar -->
           <SearchInput
+            :SearchItem="searchItem"
             :handleSearch="handleSearch"
             @updateSearchItem="updateSearchItem"
           ></SearchInput>
@@ -74,12 +76,17 @@ const updateSearchItem = (newSearchItem: string) => {
               <LoadingScreen></LoadingScreen>
             </div>
 
-            <!-- Success -->
-            <div v-else class="grid-control result">
-              <!--? Left -->
-              <ArtworkCom></ArtworkCom>
-              <!--? Right -->
-              <PokemonInfo :capFirstLetter="capFirstLetter"></PokemonInfo>
+            <!-- Result -->
+            <div v-else class="result">
+              <!-- Error Message -->
+              <p v-if="pokemonStore.hasError" class="error-text">Not Found</p>
+              <!-- Success -->
+              <div v-else class="grid-control">
+                <!--? Left -->
+                <ArtworkCom></ArtworkCom>
+                <!--? Right -->
+                <PokemonInfo :capFirstLetter="capFirstLetter"></PokemonInfo>
+              </div>
             </div>
           </div>
         </div>
@@ -91,6 +98,7 @@ const updateSearchItem = (newSearchItem: string) => {
       :searchItem="searchItem"
       :handleSearch="handleSearch"
       :capFirstLetter="capFirstLetter"
+      @sendFavName="handleSearch"
     ></FavoriteCom>
   </main>
 </template>
@@ -219,14 +227,18 @@ const updateSearchItem = (newSearchItem: string) => {
 
     // Showing info
 
-    .grid-control {
-      animation: showing 0.5s ease-in-out;
-      @include mobile {
-        gap: 24px;
-      }
+    .result {
+      overflow-y: hidden;
+      .grid-control {
+        animation: showing 0.5s ease-in-out;
 
-      @include laptop {
-        gap: 36px;
+        @include mobile {
+          gap: 24px;
+        }
+
+        @include laptop {
+          gap: 36px;
+        }
       }
     }
   }
@@ -236,6 +248,7 @@ const updateSearchItem = (newSearchItem: string) => {
 
 .grid-control {
   display: grid;
+
   @include mobile {
     @apply grid-cols-1;
   }

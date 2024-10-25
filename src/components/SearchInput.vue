@@ -1,9 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
+  SearchItem: string
   handleSearch: (favName?: string) => void
 }>()
 
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, watch } from 'vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 
 const searchItem = ref<string>('')
@@ -17,6 +18,13 @@ const handleEnter = (event: KeyboardEvent) => {
     props.handleSearch()
   }
 }
+
+watch(
+  () => props.SearchItem,
+  (newVal: string) => {
+    searchItem.value = newVal
+  },
+)
 </script>
 
 <template>

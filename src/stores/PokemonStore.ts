@@ -31,6 +31,7 @@ export const usePokemonStore = defineStore('pokemon', {
   actions: {
     async loadData(pokemonName: string) {
       try {
+        this.hasError = false
         this.isLoading = true
         const response = await axios.get(`${BASE_URL}/${pokemonName}`)
         const rawData = response.data
@@ -57,11 +58,11 @@ export const usePokemonStore = defineStore('pokemon', {
         return this.pokemonData
       } catch (error) {
         this.hasError = true
-        setTimeout(() => (this.hasError = false), 5000)
+        // setTimeout(() => (this.hasError = false), 5000)
         console.log('Store Error:', error)
       } finally {
-        // this.isLoading = false
-        setTimeout(() => (this.isLoading = false), 1000)
+        this.isLoading = false
+        // setTimeout(() => (this.isLoading = false), 1000)
       }
     },
     saveFavorite() {

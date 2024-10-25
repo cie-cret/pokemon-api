@@ -5,10 +5,12 @@ const props = defineProps<{
   capFirstLetter: (letter?: string) => string
 }>()
 
+import { defineEmits } from 'vue'
 import { usePokemonStore } from '@/stores/PokemonStore'
 
 import XIcon from '@/components/icons/XIcon.vue'
 
+const emit = defineEmits(['sendFavName'])
 const pokemonStore = usePokemonStore()
 
 const deleteFav = (index: number, pokemonName: string) => {
@@ -39,7 +41,12 @@ const deleteFav = (index: number, pokemonName: string) => {
             <div class="fav-item">
               <div
                 class="name-wrapper"
-                @click="props.handleSearch(pokemon.pkmName)"
+                @click="
+                  () => {
+                    props.handleSearch(pokemon.pkmName)
+                    emit('sendFavName', pokemon.pkmName)
+                  }
+                "
               >
                 {{ capFirstLetter(pokemon.pkmName) }}
               </div>
@@ -111,14 +118,15 @@ const deleteFav = (index: number, pokemonName: string) => {
             background: $Tag;
 
             .name-wrapper {
-              // display: inline;
               font-size: 14px;
               line-height: 24px;
+              overflow-y: hidden;
               cursor: pointer;
               transition: all 0.2s ease-in-out;
 
               &:hover {
-                font-size: 15px;
+                font-size: 16px;
+                font-weight: 600;
               }
             }
 

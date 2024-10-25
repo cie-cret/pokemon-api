@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   capFirstLetter: (letter?: string) => string
+  // favItemData: { favItem: HTMLElement | null; index: number | null }
 }>()
 
 import { computed } from 'vue'
@@ -14,11 +15,19 @@ const filteredVersions = computed(() => {
 
 const toggleFav = () => {
   const favButton = document.querySelector('#fav-button') as HTMLButtonElement
-  pokemonStore.saveFavorite()
+  // const { favItem } = props.favItemData
 
+  pokemonStore.saveFavorite()
   if (!pokemonStore.reachLimit) {
     favButton.classList.toggle('flip-animation')
   }
+
+  // if (favItem) {
+  //   const favPkmName = favItem.dataset.name
+  //   if (pokemonStore.pokemonData.pkmName === favPkmName) {
+  //     favItem.classList.add('fadeout-animation')
+  //   }
+  // }
 }
 </script>
 

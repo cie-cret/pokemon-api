@@ -5,20 +5,35 @@ const props = defineProps<{
   capFirstLetter: (letter?: string) => string
 }>()
 
-import { defineEmits } from 'vue'
+import { ref, defineEmits } from 'vue'
 import { usePokemonStore } from '@/stores/PokemonStore'
 
 import XIcon from '@/components/icons/XIcon.vue'
 
 const emit = defineEmits(['sendFavName'])
 const pokemonStore = usePokemonStore()
+const isDisabled = ref(false)
 
 const deleteFav = (index: number, pokemonName: string) => {
-  pokemonStore.deleteFavoriteItem(index)
+  const favButton = document.querySelector('#fav-button') as HTMLButtonElement
+  const favItem = document.querySelector(`#fav-item-${index}`) as HTMLElement
+  // emit('sendFavItem', { favItem, index })
+
+  favItem.classList.add('fadeout-animation')
+  isDisabled.value = true
+  setTimeout(() => {
+    isDisabled.value = false
+  }, 1000)
+
+  setTimeout(() => {
+    favItem.classList.remove('fadeout-animation')
+    pokemonStore.deleteFavoriteItem(index)
+  }, 400)
 
   if (pokemonStore.pokemonData.pkmName === pokemonName) {
-    const favButton = document.querySelector('#fav-button') as HTMLButtonElement
-    favButton.classList.toggle('flip-animation')
+    setTimeout(() => {
+      favButton.classList.toggle('flip-animation')
+    }, 400)
   }
 }
 </script>
@@ -37,6 +52,7 @@ const deleteFav = (index: number, pokemonName: string) => {
             v-for="(pokemon, index) in pokemonStore.favPokemonList"
             :key="index"
             class="relative"
+            :id="`fav-item-${index}`"
           >
             <div class="fav-item">
               <div
@@ -53,6 +69,7 @@ const deleteFav = (index: number, pokemonName: string) => {
               <button
                 class="x-icon absolute"
                 aria-label="delete from favorite"
+                :disabled="isDisabled"
                 @click="deleteFav(index, pokemon.pkmName)"
               >
                 <XIcon></XIcon>
@@ -73,12 +90,17 @@ const deleteFav = (index: number, pokemonName: string) => {
 
 // Bottom
 
+.heading-wrapper {
+  padding: 0 8px;
+}
+
 .fav-container {
   @apply flex justify-center;
 
   background: #fff;
   height: 100%;
   margin: 32px 16px;
+  border-radius: 4px;
 
   @include laptop {
     margin-top: 48px;
@@ -91,7 +113,7 @@ const deleteFav = (index: number, pokemonName: string) => {
     width: 100%;
 
     @include laptop {
-      width: 800px;
+      width: 816px;
     }
 
     h2 {
@@ -106,10 +128,18 @@ const deleteFav = (index: number, pokemonName: string) => {
     .fav-tag {
       .grid-control {
         gap: 8px 24px;
+        overflow-y: hidden;
+        padding: 0 8px;
 
         li {
           border-radius: 4px;
+          animation: showing2 0.5s ease-in-out;
           overflow-y: hidden;
+
+          &.fadeout-animation {
+            animation: fadeout 0.5s ease-in-out;
+            overflow-y: hidden;
+          }
 
           .fav-item {
             border-radius: 4px;
@@ -159,6 +189,38 @@ const deleteFav = (index: number, pokemonName: string) => {
 
   @include laptop {
     @apply grid-cols-2;
+  }
+}
+
+@keyframes showing2 {
+  0% {
+    scale: 0;
+  }
+
+  33% {
+    scale: 1.05;
+  }
+
+  66% {
+    scale: 0.95;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes fadeout {
+  0% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.05;
+  }
+
+  100% {
+    scale: 0;
   }
 }
 </style>

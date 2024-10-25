@@ -34,8 +34,8 @@ const handleSearch = async (favName?: string) => {
   }
 }
 
-const updateSearchItem = (searchItemValue: string) => {
-  searchItem.value = searchItemValue
+const sendUserInput = (userInput: string) => {
+  searchItem.value = userInput
 }
 </script>
 
@@ -52,7 +52,7 @@ const updateSearchItem = (searchItemValue: string) => {
           <SearchInput
             :SearchItem="searchItem"
             :handleSearch="handleSearch"
-            @updateSearchItem="updateSearchItem"
+            @sendUserInput="sendUserInput"
           ></SearchInput>
 
           <!-- Display -->

@@ -8,9 +8,9 @@ import { ref, defineEmits, watch } from 'vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 
 const searchItem = ref<string>('')
-const emit = defineEmits(['updateSearchItem'])
+const emit = defineEmits(['sendUserInput'])
 const emitSearchItem = () => {
-  emit('updateSearchItem', searchItem.value)
+  emit('sendUserInput', searchItem.value)
 }
 
 const handleEnter = (event: KeyboardEvent) => {

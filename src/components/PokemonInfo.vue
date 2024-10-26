@@ -153,9 +153,11 @@ const toggleFav = () => {
       transform: rotateY(0);
       transition: all 0.3s;
 
-      &:hover {
-        // animation: jump 1.5s linear infinite;
-        scale: 1.1;
+      @include laptop {
+        &:hover {
+          // animation: jump 1.5s linear infinite;
+          scale: 1.1;
+        }
       }
 
       &.flip-animation {

@@ -126,7 +126,6 @@ const sendUserInput = (userInput: string) => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  overflow: visible;
   // height: 73.265vh;
 
   background: linear-gradient(281.22deg, #0e749d 0%, #30a7d7 100%);
@@ -174,13 +173,10 @@ const sendUserInput = (userInput: string) => {
       margin-bottom: 12px;
     }
 
-    overflow: visible;
-
     // Search Input Wrapper
 
     .search-container {
       margin: 30px;
-      overflow: visible;
     }
 
     // Display
@@ -235,8 +231,6 @@ const sendUserInput = (userInput: string) => {
       overflow: visible;
       .grid-control {
         animation: showing 0.5s ease-in-out;
-        overflow: visible;
-
         @include mobile {
           gap: 24px;
         }

@@ -140,16 +140,24 @@ const toggleFav = () => {
   flex-direction: column;
   gap: 16px;
   min-width: 100%;
+  overflow: visible;
 
   // Top Right
 
   .t-info {
     display: flex;
     justify-content: space-between;
+    overflow: visible;
 
     #fav-button {
       transform: rotateY(0);
-      transition: transform 0.3s;
+      transition: all 0.3s;
+
+      &:hover {
+        // animation: jump 1.5s linear infinite;
+        scale: 1.1;
+      }
+
       &.flip-animation {
         transform: rotateY(180deg);
       }
@@ -204,4 +212,32 @@ h4 {
   line-height: 24px;
   color: $Text;
 }
+
+// @keyframes jump {
+//   0% {
+//     transform: translateY(5%);
+//   }
+
+//   15% {
+//     transform: translateY(20%);
+//   }
+
+//   45% {
+//     transform: translateY(-15%);
+//   }
+
+//   55% {
+//     transform: translateY(15%);
+//   }
+
+//   65% {
+//     transform: translateY(-5%);
+//   }
+
+//   30%,
+//   75%,
+//   100% {
+//     transform: translateY(0%);
+//   }
+// }
 </style>

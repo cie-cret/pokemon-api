@@ -92,10 +92,6 @@ const deleteFav = (index: number, pokemonName: string) => {
 
 // Bottom
 
-.heading-wrapper {
-  padding: 0 8px;
-}
-
 .fav-container {
   @apply flex justify-center;
 
@@ -115,7 +111,7 @@ const deleteFav = (index: number, pokemonName: string) => {
     width: 100%;
 
     @include laptop {
-      width: 816px;
+      width: 800px;
     }
 
     h2 {
@@ -131,7 +127,7 @@ const deleteFav = (index: number, pokemonName: string) => {
       .grid-control {
         gap: 8px 24px;
         overflow-y: hidden;
-        padding: 0 8px;
+        overflow: visible;
 
         li {
           border-radius: 4px;
